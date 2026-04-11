@@ -1,0 +1,15 @@
+# Root
+node_modules/
+.env
+
+# Frontend
+Frontend/node_modules/
+Frontend/dist/
+
+# Backend
+Backend/node_modules/
+Backend/uploads/
+
+# Misc
+.vscode/
+.DS_Store
