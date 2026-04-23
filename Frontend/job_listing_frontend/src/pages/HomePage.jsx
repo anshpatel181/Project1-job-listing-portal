@@ -10,7 +10,7 @@ export const HomePage = () => {
       <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div
           className="
-            max-w-6xl mx-auto px-6 py-24
+            max-w-6xl mx-auto px-6 py-12 md:py-24
             grid grid-cols-1 md:grid-cols-2
             gap-12 items-center
           "
@@ -63,7 +63,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 py-16">
+      <section className="max-w-6xl mx-auto px-6 py-12 md:py-16">
         <h2 className="text-3xl font-bold text-center mb-12 text-slate-800 dark:text-white">
           How It Works
         </h2>

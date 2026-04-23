@@ -108,8 +108,8 @@ export const SeekerProfile = () => {
     <>
       <DashboardNavbar />
 
-      <div className="min-h-screen bg-slate-100 p-6">
-        <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8">
+      <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
+        <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">
               Job Seeker Profile

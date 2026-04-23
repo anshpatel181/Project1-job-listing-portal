@@ -73,8 +73,8 @@ export const SeekerDashboard = () => {
     <>
       <DashboardNavbar />
 
-      <div className="min-h-screen bg-slate-100 p-6">
-        <div className="max-w-7xl mx-auto space-y-10">
+      <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>

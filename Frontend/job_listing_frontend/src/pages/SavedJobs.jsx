@@ -30,7 +30,7 @@ export const SavedJobs = () => {
     <>
       <DashboardNavbar />
 
-      <div className="min-h-screen bg-slate-100 p-6">
+      <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
         <div className="max-w-6xl mx-auto space-y-6">
 
           <div>

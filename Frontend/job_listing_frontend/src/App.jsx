@@ -19,7 +19,6 @@
   import { SavedJobs } from "./pages/SavedJobs";
   import { AppliedJobs } from "./pages/AppliedJobs";
   import { ApplicantsList } from "./pages/ApplicantsList";
-  import { useState } from "react";
 
   AOS.init({
     duration: 800,

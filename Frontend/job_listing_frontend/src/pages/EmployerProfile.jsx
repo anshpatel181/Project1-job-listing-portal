@@ -115,8 +115,8 @@ export const EmployerProfile = () => {
   return (
     <div>
       <DashboardNavbar />
-      <div className="min-h-screen bg-slate-100 p-6">
-        <form className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8" onSubmit={handleSubmit}>
+      <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
+        <form className="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6 sm:p-8" onSubmit={handleSubmit}>
 
           <div className="mb-8 border-b pb-4">
             <h1 className="text-2xl font-bold text-slate-800">

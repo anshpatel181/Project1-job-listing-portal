@@ -60,7 +60,7 @@ export const Login = () => {
       <div className="bg-slate-50 min-h-screen flex flex-col dark:bg-slate-900">
       <PublicNavbar />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8
                 transition-all duration-300 hover:shadow-2xl">
         <h1 className="text-2xl font-bold text-center text-slate-800 mb-6">
           Login to your account

@@ -81,7 +81,7 @@ export const Registration = () => {
       <PublicNavbar />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 px-4">
         <div
-          className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8
+          className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8
                 transition-all duration-300 hover:shadow-2xl"
         >
 

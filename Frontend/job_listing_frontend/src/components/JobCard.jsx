@@ -1,9 +1,9 @@
 export const JobCard = ({job, handleApply, applied, loadingApply}) => {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
 
-            <div className="space-y-3 border-b border-slate-200 pb-6">
-                <h1 className="text-3xl font-bold text-slate-800">
+            <div className="space-y-3 border-b border-slate-200 pb-4 sm:pb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
                     {job.jobTitle}
                 </h1>
 
@@ -53,9 +53,9 @@ export const JobCard = ({job, handleApply, applied, loadingApply}) => {
             <button
                 onClick={handleApply}
                 disabled={applied || loadingApply}
-                className={`mt-6 px-6 py-3 rounded-lg font-semibold transition ${applied
+                className={`mt-6 w-full sm:w-auto px-6 py-3 rounded-lg font-semibold transition ${applied
                     ? "bg-green-100 text-green-700 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-blue-600 text-white hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:scale-95"
                     }`}
             >
                 {applied ? "Applied ✔" : loadingApply ? "Applying..." : "Apply Now"}

@@ -75,10 +75,10 @@ export const CreateJob = () => {
     return (
         <div>
             <DashboardNavbar />
-            <div className="min-h-screen bg-slate-100 p-6">
+            <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                    <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200">
                         <p className="text-sm text-slate-500 mb-2">
                             Employer / Jobs / Create
                         </p>

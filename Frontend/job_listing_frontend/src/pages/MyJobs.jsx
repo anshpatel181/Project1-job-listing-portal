@@ -99,14 +99,14 @@ export const MyJobs = () => {
               placeholder="Search job title..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border border-slate-300 rounded-lg px-4 py-2 text-sm
+              className="border border-slate-300 rounded-lg px-4 py-2 text-sm w-full md:flex-1
                          focus:ring-2 focus:ring-blue-500"
             />
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-slate-300 rounded-lg px-4 py-2 text-sm
+              className="border border-slate-300 rounded-lg px-4 py-2 text-sm w-full md:w-auto
                          focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
@@ -159,7 +159,7 @@ export const MyJobs = () => {
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-end gap-3">
+                    <div className="flex flex-col items-start md:items-end gap-3 mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-none border-slate-100">
 
                       <button
                         onClick={() => handleToggleStatus(job._id)}
@@ -200,7 +200,6 @@ export const MyJobs = () => {
                 </div>
               ))
             )}
-
           </div>
         </div>
       </div>

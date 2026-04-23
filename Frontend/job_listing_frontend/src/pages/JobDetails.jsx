@@ -84,8 +84,8 @@ export const JobDetails = () => {
     <>
       <DashboardNavbar />
 
-      <div className="min-h-screen bg-slate-100 p-6">
-        <div className="max-w-5xl mx-auto space-y-6">
+      <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
+        <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
 
           <NavLink
             to="/jobs"

@@ -104,17 +104,16 @@ export const ApplicantsList = () => {
                                     className="bg-white border border-slate-200 rounded-xl p-6
                              shadow-sm hover:shadow-md transition"
                                 >
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                         <div>
                                             <h2 className="font-semibold text-slate-800">
                                                 {app.seeker.name}
                                             </h2>
-                                            <p className="text-sm text-slate-600">
+                                            <p className="text-sm text-slate-600 break-all">
                                                 {app.seeker.email}
                                             </p>
                                             <p className="text-xs text-slate-400 mt-1">
-                                                Applied on
-                                                {new Date(app.createdAt).toLocaleDateString()}
+                                                Applied on {new Date(app.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
 
@@ -132,7 +131,7 @@ export const ApplicantsList = () => {
                                         </span>
                                     </div>
 
-                                    <div className="flex gap-2 mt-3">
+                                    <div className="flex flex-wrap gap-2 mt-4">
                                         <button
                                             onClick={() =>
                                                 updateStatus(app._id, "shortlisted")
