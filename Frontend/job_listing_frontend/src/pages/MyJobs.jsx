@@ -6,7 +6,7 @@ import { FaEdit, FaTrashAlt, FaBriefcase, FaArrowLeft, FaArrowRight } from "reac
 import { toast } from "react-toastify";
 import InlineLoader from "../components/loaders/InlineLoader";
 import EmptyState from "../components/common/EmptyState";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const MyJobs = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -15,6 +15,7 @@ export const MyJobs = () => {
   const urlStatus = searchParams.get("status") || "all";
 
   const [searchInput, setSearchInput] = useState(urlSearch);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -44,7 +45,7 @@ export const MyJobs = () => {
 
     try {
       await deleteJob(id);
-      setJobs((prev) => prev.filter((job) => job._id !== id));
+      queryClient.invalidateQueries({queryKey: ["myJobs"]})
       toast.success("Job deleted successfully");
     } catch {
       toast.error("Failed to delete job");

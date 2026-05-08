@@ -56,7 +56,7 @@ export const deleteJob = async (jobId) => {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
-
+  
   if (!res.ok) {
     throw new Error("Failed to delete job");
   }
