@@ -1,69 +1,54 @@
 import { NavLink } from "react-router-dom";
 import { DashboardNavbar } from "../components/DashboardNavbar";
-import { useEffect, useState } from "react";
 import { searchJobs } from "../services/jobService";
 import { getSavedJobs } from "../services/userService";
+import { useQuery } from "@tanstack/react-query";
 
 export const SeekerDashboard = () => {
 
-  const [allJobs, setAllJobs] = useState([]);
-  const [applications, setApplications] = useState([]);
-  const [savedJobs, setSavedJobs] = useState([]);
   const BASE_URL = import.meta.env.VITE_BACKEND_URL
 
   const profileCompletion = 70;
 
   const stats = {
-    applications: 5,
-    savedJobs: 3,
     profileViews: 12,
   };
 
-  useEffect(() => {
-    const fetchAllJobs = async () => {
-      const res = await searchJobs();
-      setAllJobs(res.jobs);
-    }
-
-    const fetchApplications = async () => {
-      try {
-        const res = await fetch(
-          `${BASE_URL}/api/applications/my`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          toast.error("Failed to fetch applications");
+  const fetchApplications = async () => {
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/applications/my`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
+      );
 
-        setApplications(data);
-      } catch (error) {
-        toast.error(error.message);
+      if (!res.ok) {
+        toast.error("Failed to fetch applications");
       }
-    };
+      
+      return res.json();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
-    fetchApplications();
+  const { data: allJobs, isPending, isError, error } = useQuery({
+    queryKey: ["allJobs"],
+    queryFn: searchJobs
+  })
 
-    const fetchSavedJobs = async () => {
-      try {
-        const res = await getSavedJobs();
-        setSavedJobs(res || []);
-      } catch (error) {
-        console.error("Error fetching saved jobs:", error);
-        setJobs([]);
-      }
-    };
+  const {data: applications} = useQuery({
+    queryKey: ["applications"],
+    queryFn: fetchApplications
+  })
 
-    fetchSavedJobs();
-
-    fetchAllJobs();
-  }, []);
+  const {data: savedJobs} = useQuery({
+    queryKey: ["savedJobs"],
+    queryFn: getSavedJobs
+  })
 
   return (
     <>
@@ -116,7 +101,7 @@ export const SeekerDashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition">
               <h3 className="text-3xl font-bold text-blue-600">
-                {applications.length}
+                {applications?.length}
               </h3>
               <p className="text-sm text-slate-500 mt-1">
                 Applications Sent
@@ -125,7 +110,7 @@ export const SeekerDashboard = () => {
 
             <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition">
               <h3 className="text-3xl font-bold text-green-600">
-                {savedJobs.length}
+                {savedJobs?.length}
               </h3>
               <p className="text-sm text-slate-500 mt-1">
                 Saved Jobs
@@ -148,7 +133,7 @@ export const SeekerDashboard = () => {
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              {allJobs.slice(0, 6).map((job, index) => (
+              {allJobs?.jobs.slice(0, 6).map((job, index) => (
                 <div
                   key={index}
                   className="border border-slate-200 rounded-xl p-5

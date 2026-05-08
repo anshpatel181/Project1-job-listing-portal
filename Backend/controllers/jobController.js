@@ -17,14 +17,37 @@ export const createJob = async (req, res) => {
 
 export const getMyJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ employer: req.user.id }).sort({
-      createdAt: -1,
-    });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const search = req.query.search || "";
+    const status = req.query.status || "all";
 
-    res.json(jobs);
+    let query = { employer: req.user.id };
+
+    if (status !== "all") {
+      query.status = status;
+    }
+
+    if (search) {
+      query.jobTitle = { $regex: search, $options: "i" };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const totalJobs = await Job.countDocuments(query);
+    const jobs = await Job.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      jobs,
+      totalJobs,
+      totalPages: Math.ceil(totalJobs / limit),
+      currentPage: page,
+    });
   } catch (error) {
-    console.error("ERROR 👉", error.message);
-    console.error(error);
+    console.error("ERROR: ", error.message);
     res.status(500).json({ message: "Failed to fetch jobs" });
   }
 };
@@ -32,7 +55,6 @@ export const getMyJobs = async (req, res) => {
 export const updateJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
-    console.log(job);
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
@@ -79,15 +101,13 @@ export const deleteJob = async (req, res) => {
 
 export const getFilteredJobs = async (req, res) => {
   try {
-    const { keyword, location, type } = req.query;
-
+        
+    const { keyword, location, type, limit, currentPage } = req.query;
+    
     let query = {};
 
     if (keyword) {
-      query.$or = [
-        { jobTitle: { $regex: keyword, $options: "i" } },
-        { jobDesc: { $regex: keyword, $options: "i" } },
-      ];
+      query.$text = { $search: keyword }
     }
 
     if (location) {
@@ -98,9 +118,13 @@ export const getFilteredJobs = async (req, res) => {
       query.jobType = type;
     }
 
-    const jobs = await Job.find(query).sort({ createdAt: -1 });
+    let skip = currentPage * 5 - 5
 
-    res.status(200).json({jobs});
+    const totalJobs = await Job.countDocuments(query)
+    const jobs = await Job.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
+
+    
+    res.status(200).json({jobs, totalJobs, totalPages: Math.ceil(totalJobs / 5)});
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch jobs" });
   }

@@ -1,11 +1,18 @@
 import { NavLink } from "react-router-dom";
 import { FaUserTie, FaBriefcase, FaShieldAlt, FaUserCheck } from "react-icons/fa";
 import { PublicNavbar } from "../components/PublicNavbar";
+import { DashboardNavbar } from "../components/DashboardNavbar";
 
 export const HomePage = () => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  const isLoggedIn = !!token;
+  const loggedInPath = role === "employer" ? "/employer/jobs/new" : "/jobs";
+  const loggedInText = role === "employer" ? "Post a Job" : "Browse Jobs";
+
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col dark:bg-slate-900">
-      <PublicNavbar />
+      {isLoggedIn ? <DashboardNavbar /> : <PublicNavbar />}
 
       <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div
@@ -17,36 +24,51 @@ export const HomePage = () => {
         >
           <div className="text-center md:text-left" data-aos="fade-right">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              A Smarter Way to Hire & Get Hired
+              Ready to Build Your Next Opportunity?
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-8 max-w-xl md:max-w-none dark:text-slate-300">
-              A modern job portal connecting job seekers and employers to build
-              careers and teams faster, smarter, and securely.
+              Move forward with the right opportunities today. Employers can post
+              jobs instantly, and candidates can explore openings and apply with ease.
             </p>
 
             <div className="flex flex-col sm:flex-row md:justify-start justify-center gap-4">
-              <NavLink
-                to="/register"
-                className="
-                  bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold
-                  shadow-md hover:shadow-lg hover:bg-blue-100
-                  active:scale-95 transition-all
-                "
-              >
-                Get Started
-              </NavLink>
+              {isLoggedIn ? (
+                <NavLink
+                  to={loggedInPath}
+                  className="
+                    bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold
+                    shadow-md hover:shadow-lg hover:bg-blue-100
+                    active:scale-95 transition-all
+                  "
+                >
+                  {loggedInText}
+                </NavLink>
+              ) : (
+                <>
+                  <NavLink
+                    to="/register"
+                    className="
+                      bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold
+                      shadow-md hover:shadow-lg hover:bg-blue-100
+                      active:scale-95 transition-all
+                    "
+                  >
+                    Create Free Account
+                  </NavLink>
 
-              <NavLink
-                to="/login"
-                className="
-                  bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold
-                  shadow-md hover:shadow-lg hover:bg-blue-100
-                  active:scale-95 transition-all
-                "
-              >
-                Login
-              </NavLink>
+                  <NavLink
+                    to="/login"
+                    className="
+                      bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold
+                      shadow-md hover:shadow-lg hover:bg-blue-100
+                      active:scale-95 transition-all
+                    "
+                  >
+                    Login
+                  </NavLink>
+                </>
+              )}
             </div>
           </div>
 
@@ -159,19 +181,43 @@ export const HomePage = () => {
 
       <section className="bg-blue-600 text-white" data-aos="fade-up">
         <div className="max-w-6xl mx-auto px-6 py-16 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-white">
-            Ready to Get Started?
-          </h2>
-          <p className="text-blue-100 mb-6 dark:text-slate-300">
-            Join today and take the next step in your career or hiring journey.
-          </p>
+          {isLoggedIn ?
+            (
+              <>
+                <h2 className="text-3xl font-bold mb-4 text-white">
+                  Ready to Get Started?
+                </h2>
+                <p className="text-blue-100 mb-6 dark:text-slate-300">
+                  Join today and take the next step in your career or hiring journey.
+                </p>
 
-          <NavLink
-            to="/register"
-            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-100 transition"
-          >
-            Create Free Account
-          </NavLink>
+                <NavLink
+                  to="/register"
+                  className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-100 transition"
+                >
+                  Create Free Account
+                </NavLink>
+              </>
+            ) :
+            (
+              <>
+                <h2 className="text-3xl font-bold mb-4 text-white">
+                  Ready to Get Started?
+                </h2>
+                <p className="text-blue-100 mb-6 dark:text-slate-300">
+                  Join today and take the next step in your career or hiring journey.
+                </p>
+
+                <NavLink
+                  to="/register"
+                  className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-100 transition"
+                >
+                  Create Free Account
+                </NavLink>
+              </>
+            )
+          }
+
         </div>
       </section>
 

@@ -6,69 +6,90 @@ import { DashboardNavbar } from "../components/DashboardNavbar";
 import { toast } from "react-toastify";
 import InlineLoader from "../components/loaders/InlineLoader";
 import EmptyState from "../components/common/EmptyState";
-import { FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaSearch } from "react-icons/fa";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
 
 export const JobList = () => {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
+  const [debouncedLocation, setDebouncedLocation] = useState("");
   const [location, setLocation] = useState("");
   const [jobType, setJobType] = useState("");
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [savedJobs, setSavedJobs] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient()
 
-  const page = searchParams.get("page") || 1;
+  const currentPage = parseInt(searchParams.get("page")) || 1;
+  const urlJobKeyword = searchParams.get("keyword") || "";
+  const urlJobLocation = searchParams.get("location") || "";
+  const urlJobType = searchParams.get("jobType") || "all";
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const keywordTimer = setTimeout(() => {
       setDebouncedKeyword(keyword);
+
+      if (urlJobKeyword !== keyword) {
+        setSearchParams({ page: currentPage, keyword, location: urlJobLocation, jobType: urlJobType })
+      }
     }, 1000);
-    return () => clearTimeout(timer);
+
+    return () => clearTimeout(keywordTimer);
   }, [keyword]);
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const data = await searchJobs({
-          keyword: debouncedKeyword,
-          location,
-          type: jobType,
-        });
-        setJobs(data.jobs);
-      } catch {
-        toast.error("Failed to load jobs");
-      } finally {
-        setLoading(false);
+    const locationTimer = setTimeout(() => {
+
+      setDebouncedLocation(location)
+      
+      if (urlJobLocation !== location) {
+        setSearchParams({ page: currentPage, keyword: urlJobKeyword, location, jobType: urlJobType })
       }
-    };
-    fetchJobs();
-  }, [debouncedKeyword, location, jobType]);
+    }, 1000)
 
-  useEffect(() => {
-    const fetchSavedJobs = async () => {
-      const saved = await getSavedJobs();
-      setSavedJobs(saved.map((job) => job._id));
-    };
-    fetchSavedJobs();
-  }, []);
+    return () => clearTimeout(locationTimer)
+  }, [location])
 
-  const isJobSaved = (jobId) => savedJobs.includes(jobId);
+  const {data, isPending, isError, error} = useQuery({
+    queryKey: ["jobs", debouncedKeyword, debouncedLocation, jobType, urlJobType, currentPage],
+    queryFn: () => searchJobs({ keyword: debouncedKeyword, location: debouncedLocation, type: jobType, limit: 5, currentPage })
+  })
 
-  const handleSaveClick = async (jobId) => {
-    await toggleSaveJob(jobId);
-    setSavedJobs((prev) =>
-      prev.includes(jobId)
-        ? prev.filter((id) => id !== jobId)
-        : [...prev, jobId]
-    );
-  };
+  if(isError) {
+    toast.error("Failed to load jobs")
+    console.log(error);
+  }
+
+  const {data: savedJobs, isPending: savedPending, isError: savedError} = useQuery({
+    queryKey: ["savedJobs"],
+    queryFn: getSavedJobs,
+    select: (data) => data.map((job) => job._id)
+  })
+
+  const isJobSaved = (jobId) => savedJobs?.includes(jobId)
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= data.totalPages) {
+      setSearchParams({ page: newPage, keyword: urlJobKeyword, location: urlJobLocation, type: urlJobType })
+    }
+  }
+
+  const handleJobTypeChange = (e) => {
+    setJobType(e.target.value)
+    setSearchParams({page: currentPage, keyword: urlJobKeyword, location: urlJobLocation, jobType: e.target.value})
+  }
+
+  const saveJobMutation = useMutation({
+    mutationFn: (jobId) => toggleSaveJob(jobId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["savedJobs"]})
+    },
+    onError: () => {
+      toast.error("Failed to Save Job")
+    }
+  })
 
   return (
     <>
       <DashboardNavbar />
-
       <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
         <div className="max-w-7xl mx-auto space-y-8">
 
@@ -103,7 +124,7 @@ export const JobList = () => {
 
               <select
                 value={jobType}
-                onChange={(e) => setJobType(e.target.value)}
+                onChange={handleJobTypeChange}
                 className="border border-slate-300 rounded-lg px-4 py-2 text-sm
                            focus:ring-2 focus:ring-blue-500"
               >
@@ -128,13 +149,13 @@ export const JobList = () => {
           </div>
 
           <p className="text-sm text-slate-500">
-            Showing <span className="font-medium">{jobs.length} </span>
-            job{jobs.length !== 1 && "s"}
+            Showing <span className="font-medium">{data?.jobs.length || 0} </span>
+            job{data?.jobs.length !== 1 && "s"}
           </p>
 
           <div className="space-y-5">
-            {loading ? (<InlineLoader />) : jobs.length > 0 ? (
-              jobs.map((job) => (
+            {isPending ? (<InlineLoader />) : data?.jobs.length > 0 ? (
+              data?.jobs.map((job) => (
                 <div
                   key={job._id}
                   className="bg-white rounded-2xl border border-slate-200 p-6
@@ -169,13 +190,11 @@ export const JobList = () => {
                       </NavLink>
 
                       <button
-                        onClick={() => handleSaveClick(job._id)}
-                        className={`text-sm font-medium transition ${isJobSaved(job._id)
-                          ? "text-red-500"
-                          : "text-slate-500 hover:text-blue-600"
-                          }`}
+                        onClick={() => saveJobMutation.mutate(job._id)}
+                        className={`text-sm font-medium transition ${isJobSaved(job._id) ? "text-red-500" : "text-slate-500 hover:text-blue-600"}
+                       ` }
                       >
-                        ❤️ {isJobSaved(job._id) ? "Saved" : "Save"}
+                        ❤️ {isJobSaved(job._id) ? "Saved" : "Save"} 
                       </button>
                     </div>
                   </div>
@@ -199,7 +218,15 @@ export const JobList = () => {
                 </div>
               )}
           </div>
-
+          {
+            data?.jobs.length > 0 && !isPending && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1} className={` border-2 px-4 py-2 inline-flex items-center gap-1 transition rounded ${currentPage <= 1 ? "bg-slate-300 text-slate-500 cursor-not-allowed border-transparant" : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 cursor-pointer shadow-sm"}`}> <FaArrowLeft className="w-3 h-3" /> Prev</button>
+                <p className="text-slate-600 font-medium px-4">Page {currentPage} of {data.totalPages}</p>
+                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage >= data.totalPages} className={`border-2 px-4 py-2 inline-flex items-center gap-1 transition rounded ${currentPage >= data.totalPages ? "bg-slate-300 text-slate-500 cursor-not-allowed border-transparant" : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 cursor-pointer shadow-sm"}`}>Next <FaArrowRight className="w-3 h-3" /> </button>
+              </div>
+            )
+          }
         </div>
       </div>
     </>

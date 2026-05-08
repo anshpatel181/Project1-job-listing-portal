@@ -2,6 +2,7 @@ import { useState } from "react";
 import { DashboardNavbar } from "../components/DashboardNavbar";
 import { createJob } from "../services/jobService";
 import ButtonLoader from "../components/loaders/ButtonLoader";
+import { toast } from "react-toastify";
 
 export const CreateJob = () => {
     const [jobInput, setJobInput] = useState({
@@ -56,15 +57,16 @@ export const CreateJob = () => {
         console.log(jobInput);
         setIsLoading(true)
         createJob(jobInput);
+        toast.success("Job Posted Successfully")
         setJobInput({
-        jobTitle: "",
-        jobDesc: "",
-        jobRes: "",
-        jobQual: "",
-        jobLoc: "",
-        minSalary: "",
-        maxSalary: "",
-        jobType: ""
+            jobTitle: "",
+            jobDesc: "",
+            jobRes: "",
+            jobQual: "",
+            jobLoc: "",
+            minSalary: "",
+            maxSalary: "",
+            jobType: ""
         })
         setIsLoading(false)
     }
@@ -156,17 +158,19 @@ export const CreateJob = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">
-                                            Job Type
-                                        </label>
-                                        <input
-                                            className={inputClass}
-                                            placeholder="e.g. Internship/Part-time/Full-time"
-                                            name="jobType"
+                                        <label>Select Job Type</label>
+                                        <select
                                             value={jobType}
                                             onChange={handleInputChange}
-                                            required
-                                        />
+                                            name="jobType"
+                                            className="border border-slate-300 rounded-lg px-4 py-2 text-sm
+                           focus:ring-2 focus:ring-blue-500 ml-4"
+                                        >
+                                            <option value="">All Job Types</option>
+                                            <option value="Full-time">Full-time</option>
+                                            <option value="Part-time">Part-time</option>
+                                            <option value="Internship">Internship</option>
+                                        </select>
                                     </div>
                                 </div>
                             </section>
@@ -263,7 +267,7 @@ export const CreateJob = () => {
                                             : "bg-slate-300 text-slate-500 cursor-not-allowed"
                                         }`}
                                 >
-                                    {isLoading ? <ButtonLoader />: "Publish Job"}
+                                    {isLoading ? <ButtonLoader /> : "Publish Job"}
                                 </button>
                             </div>
                         </form>

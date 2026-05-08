@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')).render(
       pauseOnFocusLoss
       draggable
       theme="colored"
-      toastStyle={{ fontSize: "1.3rem" }}
+      toastStyle={{ fontSize: "1rem" }}
       transition={Slide} />
   </StrictMode>,
 )

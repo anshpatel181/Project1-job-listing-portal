@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { useState } from "react";
-import { getProfile, updateProfile } from "../services/profileService";
+import { getProfile, updateEmployerProfile } from "../services/profileService";
 import { DashboardNavbar } from "../components/DashboardNavbar";
 import { toast } from "react-toastify";
 import FullScreenLoader from "../components/loaders/FullScreenLoader";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FaFileDownload } from "react-icons/fa";
 
 export const EmployerProfile = () => {
 
@@ -20,8 +22,58 @@ export const EmployerProfile = () => {
   const [logoError, setLogoError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient()
+  const [downloadUrl, setDownloadUrl] = useState("")
 
+  const { data, isPending } = useQuery({
+    queryKey: ["employerProfile"],
+    queryFn: getProfile
+  })
+
+  useEffect(() => {
+    if (data) {
+      setEmployerDetails({
+        companyName: data.companyName,
+        industry: data.industry,
+        size: data.size,
+        email: data.companyEmail,
+        phoneNo: data.phoneNo,
+        website: data.website,
+        desc: data.description,
+      })
+    }
+  }, [data]);
+
+  const employerProfileMutation = useMutation({
+    mutationFn: (profileData) => updateEmployerProfile(profileData),
+    onSuccess: () => {
+      toast.success("Profile Updated Successfully")
+      setIsSaving(false)
+      queryClient.invalidateQueries({ queryKey: ["employerProfile"] })
+    },
+    onError: () => {
+      toast.error("Failed to save profile, please try again.")
+      setIsSaving(false)
+    }
+  })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setIsSaving(true);
+    setMessage("");
+
+    const formData = new FormData();
+    if (companyLogo) formData.append("companyLogo", companyLogo)
+    formData.append("companyName", employerDetails.companyName)
+    formData.append("industry", employerDetails.industry)
+    formData.append("size", employerDetails.size)
+    formData.append("companyEmail", employerDetails.email)
+    formData.append("phoneNo", employerDetails.phoneNo)
+    formData.append("website", employerDetails.website)
+    formData.append("description", employerDetails.desc)
+    employerProfileMutation.mutate(formData)
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -35,9 +87,9 @@ export const EmployerProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/svg+xml"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Only PNG or JPG images are allowed");
+      toast.error("Only PNG, JPG, WEBP, SVG or JPEG images are allowed");
       setCompanyLogo(null);
       return;
     }
@@ -50,65 +102,18 @@ export const EmployerProfile = () => {
 
     setLogoError("");
     setCompanyLogo(file);
-  };  
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setIsSaving(true);
-    setMessage("");
-
-    try {
-      await updateProfile({
-        companyName: employerDetails.companyName,
-        industry: employerDetails.industry,
-        size: employerDetails.size,
-        website: employerDetails.website,
-        description: employerDetails.desc,
-        companyEmail: employerDetails.email,
-        phoneNo: employerDetails.phoneNo,
-      });
-
-      toast.success("Profile Saved Successfully");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to Save Profile");
-    }
-    finally {
-      setIsSaving(false);
-    }
-  }
+  };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await getProfile();
-
-        if (data) {
-          setEmployerDetails({
-            companyName: data.companyName,
-            industry: data.industry,
-            size: data.size,
-            email: data.companyEmail,
-            phoneNo: data.phoneNo,
-            website: data.website,
-            desc: data.description,
-          })
-        }
-      } catch (error) {
-        console.error("Error loading profile:", error.message);
-      }
-      finally {
-        setIsLoading(false)
-      }
+    if (data?.logoUrl) {
+      const url = data.logoUrl.replace("/upload/", "/upload/fl_attachment/")
+      setDownloadUrl(url)
     }
-    fetchProfile();
-  }, []);
+  }, [data])
 
-  if (isLoading) {
+  if (isPending) {
     return (
-      <FullScreenLoader/>
+      <FullScreenLoader />
     );
   }
 
@@ -128,13 +133,13 @@ export const EmployerProfile = () => {
           </div>
 
           <section className="mb-8">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4">
-              Company Logo
+            <h2 className="text-lg font-semibold text-slate-800 mb-4 ml-[0.5px]">
+              {data?.logoUrl ? "Change Logo" : "Company Logo"}
             </h2>
 
             <input
               type="file"
-              accept="image/png, image/jpeg"
+              accept="image/png, image/jpeg, image/jpg, image/webp, image/svg"
               onChange={handleLogoChange}
               className="block w-full text-sm text-slate-500
             file:mr-4 file:py-2 file:px-4
@@ -144,6 +149,36 @@ export const EmployerProfile = () => {
             hover:file:bg-blue-100"
             />
 
+            <p className="mt-2 ml-1">Uploaded Logo</p>
+            {data?.logoUrl && (
+              <div className="my-4 flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                <div className="flex items-center gap-2 text-sm text-green-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="truncate max-w-[250px]">{data?.fileName}</span>
+                </div>
+
+                <div>
+                  <a
+                    href={downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    Download <FaFileDownload size={16} className="inline-flex mr-2 mb-1 hover:underline" />
+                  </a>
+                  <a
+                    href={data.logoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-4 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    View Logo ↗
+                  </a>
+                </div>
+              </div>
+            )}
             {logoError && (
               <p className="text-red-500 text-sm mt-2">{logoError}</p>
             )}
@@ -191,7 +226,7 @@ export const EmployerProfile = () => {
                 required
               />
               <input
-                type="text"
+                type="number"
                 placeholder="Company Size (e.g. 50-100)"
                 className="border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
                 name="size"

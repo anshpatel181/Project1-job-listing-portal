@@ -1,37 +1,35 @@
 import { NavLink } from "react-router-dom";
 import { FaBriefcase, FaPlusCircle, FaBuilding } from "react-icons/fa";
 import { DashboardNavbar } from "../components/DashboardNavbar";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import InlineLoader from "../components/loaders/InlineLoader";
+import { useQuery } from "@tanstack/react-query";
 
 export const EmployerDashboard = () => {
   const [stats, setStats] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch(
-          `${BASE_URL}/api/applications/employer/stats`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/applications/employer/stats`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-        const data = await res.json();
-        setStats(data);
-      } catch (error) {
-        console.error("Failed to load stats");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
+      return res.json();
+    } catch (error) {
+      console.error("Failed to load stats");
+    }
+  };
+  
+  const {data, isPending} = useQuery({
+    queryKey: ["employerStats"],
+    queryFn: fetchStats
+  })
 
   return (
     <>
@@ -53,7 +51,7 @@ export const EmployerDashboard = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-            {isLoading ? (
+            {isPending ? (
               <div className="col-span-3">
                 <InlineLoader />
               </div>
@@ -61,12 +59,12 @@ export const EmployerDashboard = () => {
               [
                 {
                   label: "Active Jobs",
-                  value: stats.totalJobs || 0,
+                  value: data?.totalJobs || 0,
                   color: "text-blue-600",
                 },
                 {
                   label: "Total Applications",
-                  value: stats.totalApplications || 0,
+                  value: data?.totalApplications || 0,
                   color: "text-indigo-600",
                 },
                 {
@@ -93,7 +91,7 @@ export const EmployerDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <NavLink
-              to="/employer/jobs/new"
+              to="/employer/post-job"
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white
                          rounded-xl p-6
                          shadow-lg hover:shadow-xl hover:-translate-y-1
@@ -142,10 +140,7 @@ export const EmployerDashboard = () => {
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
             <p className="text-slate-600 text-sm">
               💡 Tip: Job posts with clear responsibilities and salary ranges
-              receive up to{" "}
-              <span className="font-semibold text-slate-800">
-                40% more applications
-              </span>.
+              receive up to <span className="font-semibold text-slate-800">40% more applications.</span>
             </p>
           </div>
 

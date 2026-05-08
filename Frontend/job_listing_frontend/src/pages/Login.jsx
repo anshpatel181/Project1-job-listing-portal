@@ -38,11 +38,11 @@ export const Login = () => {
         localStorage.setItem("role", data.role);
 
         if(data.role === "employer") {
-          toast.success("You have logged in successfully, redirecting to dashboard")
+          toast.success("You have logged in successfully")
           navigate("/employer/dashboard", {replace: true });
         }
         else if(data.role === "job_seeker") {
-          toast.success("You have logged in successfully, redirecting to dashboard")
+          toast.success("You have logged in successfully")
           navigate("/seeker/dashboard", {replace: true });
         }
 

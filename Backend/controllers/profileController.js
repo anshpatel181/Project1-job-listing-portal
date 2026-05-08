@@ -10,25 +10,42 @@ export const getProfile = async (req, res) => {
 
     res.json(profile);
   } catch (error) {
-    console.error("GET PROFILE ERROR:", error);
+    console.error("Get Profile Error:", error);
     res.status(500).json({ message: "Failed to fetch profile" });
   }
 };
-
 
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const role = req.user.role;
+    
+    const updateData = { ...req.body, role, userId };
+
+    if (req.file) {
+
+      const fileUrl = req.file.path
+      const fileName = req.file.originalname
+      
+      if (role === 'employer') {
+        updateData.logoUrl = fileUrl;
+        updateData.fileName = fileName
+      } else if (role === 'job_seeker') {
+        updateData.resumeUrl = fileUrl;
+        updateData.fileName = fileName
+      }
+    }
 
     const updatedProfile = await Profile.findOneAndUpdate(
       { userId },
-      { ...req.body, role, userId },
+      updateData,
       { new: true, upsert: true }
     );
-
+    
     res.json(updatedProfile);
+
   } catch (error) {
+    console.error("Profile Update Error:", error);
     res.status(500).json({ message: "Failed to update profile" });
   }
 };

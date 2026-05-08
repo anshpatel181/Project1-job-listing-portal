@@ -1,19 +1,13 @@
-// const API_URL = "http://localhost:5000/api/profile";
 const BASE_URL = import.meta.env.VITE_BACKEND_URL + '/api/profile';
 
-const getAuthHeaders = () => {
+export const getProfile = async () => {
   const token = localStorage.getItem("token");
 
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
-};
-
-export const getProfile = async () => {
-  const response = await fetch(BASE_URL, {
+  const response = await fetch(BASE_URL+'/get-profile', {
     method: "GET",
-    headers: getAuthHeaders(),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
   });
 
   if (!response.ok) {
@@ -23,16 +17,60 @@ export const getProfile = async () => {
   return response.json();
 };
 
-export const updateProfile = async (profileData) => {
-  const response = await fetch(BASE_URL, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(profileData),
-  });
+export const updateEmployerProfile = async (profileData) => {
 
-  if (!response.ok) {
-    throw new Error("Failed to update profile");
+  console.log(profileData.get("companyLogo"));
+  console.log(profileData.get("companyName"));
+  console.log(profileData.get("industry"));
+  console.log(profileData.get("size"));
+  console.log(profileData.get("companyEmail"));
+  console.log(profileData.get("phoneNo"));
+  console.log(profileData.get("website"));
+  console.log(profileData.get("description"));
+  
+  
+  const token = localStorage.getItem("token");  
+  
+  try {
+    const response = await fetch(BASE_URL+'/update-employer-profile', {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: profileData
+    });
+  
+    if (!response.ok) {
+      throw new Error("Failed to update profile");
+    }
+  
+    return response.json();
+  } catch (error) {
+    console.log(error.message);
+    throw error    
   }
+};
 
-  return response.json();
+export const updateSeekerProfile = async (profileData) => {  
+  
+  const token = localStorage.getItem("token");  
+  
+  try {
+    const response = await fetch(BASE_URL+'/update-seeker-profile', {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: profileData
+    });
+  
+    if (!response.ok) {
+      throw new Error("Failed to update profile");
+    }
+  
+    return response.json();
+  } catch (error) {
+    console.log(error.message);
+    throw error    
+  }
 };

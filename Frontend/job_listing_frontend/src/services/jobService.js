@@ -1,4 +1,3 @@
-// const API_URL = "http://localhost:5000/api/jobs";
 const BASE_URL = import.meta.env.VITE_BACKEND_URL + '/api/jobs';
 
 const getAuthHeaders = () => {
@@ -24,8 +23,9 @@ export const createJob = async (jobData) => {
   return res.json();
 };
 
-export const getMyJobs = async () => {
-  const res = await fetch(`${BASE_URL}/my`, {
+export const getMyJobs = async (filters = {}) => {
+  const params = new URLSearchParams(filters);
+  const res = await fetch(`${BASE_URL}/my?${params.toString()}`, {
     method: "GET",
     headers: getAuthHeaders(),
   });

@@ -10,11 +10,12 @@ const profileSchema = new mongoose.Schema(
     },
 
     role: {
-      type: String,
+      type: String, 
       enum: ["job_seeker", "employer"],
       required: true,
     },
 
+    fileName: String,
     fullName: String,
     phoneNo: String,
     location: String,
@@ -26,7 +27,7 @@ const profileSchema = new mongoose.Schema(
 
     companyName: String,
     industry: String,
-    size: String,
+    size: Number,
     website: String,
     description: String,
     logoUrl: String,

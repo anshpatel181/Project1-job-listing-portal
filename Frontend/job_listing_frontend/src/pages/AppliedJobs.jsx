@@ -3,40 +3,41 @@ import { NavLink } from "react-router-dom";
 import { DashboardNavbar } from "../components/DashboardNavbar";
 import { toast } from "react-toastify";
 import InlineLoader from "../components/loaders/InlineLoader";
+import { useQuery } from "@tanstack/react-query";
 
 export const AppliedJobs = () => {
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
   const BASE_URL = import.meta.env.VITE_BACKEND_URL
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const res = await fetch(
-          `${BASE_URL}/api/applications/my`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          toast.error("Failed to fetch applications");
-        }
-
-        setApplications(data);
-      } catch (error) {
-        toast.error(error.message);
-      } finally {
-        setLoading(false);
+  const fetchApplications = async () => {
+    const res = await fetch(
+      `${BASE_URL}/api/applications/my`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       }
-    };
+    );
 
-    fetchApplications();
-  }, []);
+    if (!res.ok) {
+      throw new Error("Failed to fetch applications");
+    }
+
+    return res.json();
+  }
+
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ["applications"],
+    queryFn: fetchApplications,
+  })
+
+  useEffect(() => {
+
+    if (isError) {
+      toast.error("Failed to fetch applications")
+      console.log(error);
+    }
+
+  }, [isError])
 
   return (
     <>
@@ -56,9 +57,9 @@ export const AppliedJobs = () => {
 
           <div className="space-y-4">
 
-            {loading ? (
+            {isPending ? (
               <InlineLoader />
-            ) : applications.length === 0 ? (
+            ) : data?.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-xl p-10 text-center">
                 <h2 className="text-lg font-semibold text-slate-800 mb-2">
                   No applications yet
@@ -75,7 +76,7 @@ export const AppliedJobs = () => {
                 </NavLink>
               </div>
             ) : (
-              applications.map((app) => (
+              data?.map((app) => (
                 <div
                   key={app._id}
                   className="bg-white border border-slate-200 rounded-xl p-6

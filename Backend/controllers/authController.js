@@ -34,7 +34,7 @@ export const register = async (req, res) => {
     res
       .status(201)
       .json({
-        message: "You have registered successfully redirecting to dashboard",
+        message: "You have registered successfully",
         token,
         role: user.role,
       });

@@ -1,33 +1,43 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getMyJobs, deleteJob, toggleJobStatus } from "../services/jobService";
 import { DashboardNavbar } from "../components/DashboardNavbar";
-import { FaEdit, FaTrashAlt, FaBriefcase } from "react-icons/fa";
+import { FaEdit, FaTrashAlt, FaBriefcase, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { toast } from "react-toastify";
 import InlineLoader from "../components/loaders/InlineLoader";
 import EmptyState from "../components/common/EmptyState";
+import { useQuery } from "@tanstack/react-query";
 
 export const MyJobs = () => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = parseInt(searchParams.get("page")) || 1;
+  const urlSearch = searchParams.get("search") || "";
+  const urlStatus = searchParams.get("status") || "all";
 
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchInput, setSearchInput] = useState(urlSearch);
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const data = await getMyJobs();
-        setJobs(data);
-      } catch (error) {
-        toast.error("Failed to load jobs");
-      } finally {
-        setLoading(false);
+    const timer = setTimeout(() => {
+      if (searchInput !== urlSearch) {
+        setSearchParams({ page: 1, search: searchInput, status: urlStatus });
       }
-    };
+    }, 500);
 
-    fetchJobs();
-  }, []);
+    return () => clearTimeout(timer);
+  }, [searchInput, urlSearch, urlStatus, setSearchParams]);
+
+  const handleStatusChange = (e) => {
+    setSearchParams({ page: 1, search: urlSearch, status: e.target.value });
+  };
+
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ["myJobs", currentPage, urlSearch, urlStatus],
+    queryFn: () => getMyJobs({ page: currentPage, limit: 5, search: urlSearch, status: urlStatus })
+  })
+
+  if(data) {
+    console.log(data);
+  }
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this job?")) return;
@@ -55,16 +65,11 @@ export const MyJobs = () => {
     }
   };
 
-  const filteredJobs = jobs.filter((job) => {
-    const matchesSearch = job.jobTitle
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "all" || job.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= data?.totalPages) {
+      setSearchParams({ page: newPage, search: urlSearch, status: urlStatus });
+    }
+  };
 
   return (
     <>
@@ -84,7 +89,7 @@ export const MyJobs = () => {
             </div>
 
             <NavLink
-              to="/employer/jobs/new"
+              to="/employer/post-job"
               className="bg-blue-600 text-white px-5 py-2.5 rounded-lg
                          hover:bg-blue-700 transition"
             >
@@ -97,15 +102,15 @@ export const MyJobs = () => {
             <input
               type="text"
               placeholder="Search job title..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="border border-slate-300 rounded-lg px-4 py-2 text-sm w-full md:flex-1
                          focus:ring-2 focus:ring-blue-500"
             />
 
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              value={urlStatus}
+              onChange={handleStatusChange}
               className="border border-slate-300 rounded-lg px-4 py-2 text-sm w-full md:w-auto
                          focus:ring-2 focus:ring-blue-500"
             >
@@ -117,27 +122,26 @@ export const MyJobs = () => {
 
           <div className="space-y-4">
 
-            {loading ? (
+            {isPending ? (
               <InlineLoader />
-
-            ) : jobs.length === 0 ? (
-              <EmptyState
-                icon={<FaBriefcase />}
-                title="You haven't posted any jobs yet"
-                description="Start hiring by creating your first job listing."
-                actionText="Post New Job"
-                actionLink="/employer/jobs/new"
-              />
-
-            ) : filteredJobs.length === 0 ? (
-              <EmptyState
-                icon={<FaBriefcase />}
-                title="No jobs match your filters"
-                description="Try adjusting your search or status filter."
-              />
-
+            ) : data?.jobs.length === 0 ? (
+              (!urlSearch && urlStatus === 'all') ? (
+                <EmptyState
+                  icon={<FaBriefcase />}
+                  title="You haven't posted any jobs yet"
+                  description="Start hiring by creating your first job listing."
+                  actionText="Post New Job"
+                  actionLink="/employer/jobs/new"
+                />
+              ) : (
+                <EmptyState
+                  icon={<FaBriefcase />}
+                  title="No jobs match your filters"
+                  description="Try adjusting your search or status filter."
+                />
+              )
             ) : (
-              filteredJobs.map((job) => (
+              data?.jobs.map((job) => (
                 <div
                   key={job._id}
                   className="bg-white border border-slate-200 rounded-xl p-6
@@ -163,11 +167,10 @@ export const MyJobs = () => {
 
                       <button
                         onClick={() => handleToggleStatus(job._id)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                          job.status === "active"
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-red-100 text-red-700 hover:bg-red-200"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition ${job.status === "active"
+                          ? "bg-green-100 text-green-700 hover:bg-green-200"
+                          : "bg-red-100 text-red-700 hover:bg-red-200"
+                          }`}
                       >
                         {job.status === "active" ? "Active" : "Closed"}
                       </button>
@@ -201,6 +204,32 @@ export const MyJobs = () => {
               ))
             )}
           </div>
+
+          {data?.jobs.length > 0 && !isPending && (
+            <div className="flex gap-2 justify-center items-center mt-6">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage <= 1}
+                className={`border border-2 rounded px-4 py-2 inline-flex items-center gap-1 transition ${currentPage <= 1 ? "bg-slate-300 text-slate-500 cursor-not-allowed border-transparent" : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 cursor-pointer shadow-sm"
+                  }`}
+              >
+                <FaArrowLeft className="w-3 h-3" /> Prev
+              </button>
+
+              <span className="text-slate-600 font-medium px-4">
+                Page {currentPage} of {data?.totalPages}
+              </span>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= data?.totalPages}
+                className={`border border-2 rounded px-4 py-2 inline-flex items-center gap-1 transition ${currentPage >= data?.totalPages ? "bg-slate-300 text-slate-500 cursor-not-allowed border-transparent" : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 cursor-pointer shadow-sm"
+                  }`}
+              >
+                Next <FaArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

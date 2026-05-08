@@ -13,11 +13,6 @@ export const applyToJob = async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
-
-    if (existing) {
-      return res.status(400).json({ message: "Already applied" });
-    }
-
     const application = await Application.create({
       job: job._id,
       seeker: req.user.id,
@@ -26,6 +21,7 @@ export const applyToJob = async (req, res) => {
 
     res.status(201).json(application);
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ message: "Failed to apply" });
   }
 };

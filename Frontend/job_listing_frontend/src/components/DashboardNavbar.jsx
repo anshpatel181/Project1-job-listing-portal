@@ -12,7 +12,7 @@ export const DashboardNavbar = () => {
       : "text-slate-600 hover:text-blue-600";
 
   return (
-    <nav className="bg-white border-b shadow-sm relative relative z-50">
+    <nav className="bg-white border-b shadow-sm relative z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
         <NavLink to={role === "job_seeker" ? "/seeker/dashboard" : "/employer/dashboard"} className="text-xl font-bold text-blue-600">
@@ -33,7 +33,7 @@ export const DashboardNavbar = () => {
             <>
               <NavLink to="/employer/dashboard" className={navLinkClass}>Dashboard</NavLink>
               <NavLink to="/employer/jobs" className={navLinkClass}>My Jobs</NavLink>
-              <NavLink to="/employer/jobs/new" className={navLinkClass}>Post Job</NavLink>
+              <NavLink to="/employer/post-job" className={navLinkClass}>Post Job</NavLink>
               <NavLink to="/employer/profile" className={navLinkClass}>Company</NavLink>
             </>
           )}

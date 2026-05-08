@@ -1,30 +1,17 @@
-import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { getSavedJobs } from "../services/userService";
 import { DashboardNavbar } from "../components/DashboardNavbar";
 import InlineLoader from "../components/loaders/InlineLoader";
 import { FaBookmark } from "react-icons/fa";
 import EmptyState from "../components/common/EmptyState";
+import { useQuery } from "@tanstack/react-query";
 
 export const SavedJobs = () => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSavedJobs = async () => {
-      try {
-        const res = await getSavedJobs();
-        setJobs(res || []);
-      } catch (error) {
-        console.error("Error fetching saved jobs:", error);
-        setJobs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSavedJobs();
-  }, []);
+  const {data, isPending} = useQuery({
+    queryKey: ["savedJobs"],
+    queryFn: getSavedJobs
+  })
 
   return (
     <>
@@ -44,9 +31,9 @@ export const SavedJobs = () => {
 
           <div className="space-y-4">
 
-            {loading ? (
+            {isPending ? (
               <InlineLoader />
-            ) : jobs.length === 0 ? (
+            ) : data?.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-xl p-10 text-center">
                 <h2 className="text-lg font-semibold text-slate-800 mb-2">
                   <EmptyState
@@ -59,7 +46,7 @@ export const SavedJobs = () => {
                 </h2>
               </div>
             ) : (
-              jobs.map((job) => (
+              data?.map((job) => (
                 <div
                   key={job._id}
                   className="bg-white border border-slate-200 rounded-xl p-6
