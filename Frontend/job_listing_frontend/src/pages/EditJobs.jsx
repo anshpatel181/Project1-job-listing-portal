@@ -27,9 +27,9 @@ export const EditJobs = () => {
     useEffect(() => {
         const fetchJob = async () => {
             try {
-                const jobs = await getMyJobs();                
+                const jobs = await getMyJobs();
                 const job = jobs.jobs.find((j) => j._id.toString() === id.toString());
-                
+
                 if (!job) {
                     toast.error("Job not found");
                     navigate("/employer/jobs");
@@ -109,7 +109,12 @@ export const EditJobs = () => {
         "w-full border border-slate-300 rounded-lg px-4 py-2 text-sm bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500";
 
     if (loading) {
-        return <FullScreenLoader />;
+        return (
+            <div className="fullscreen-loader">
+                <div className="spinner"></div>
+                <p>Loading Job...</p>
+            </div>
+        );
     }
 
     return (
