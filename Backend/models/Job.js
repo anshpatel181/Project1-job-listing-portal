@@ -2,66 +2,30 @@ import mongoose from "mongoose";
 
 const jobSchema = new mongoose.Schema(
   {
-    employer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    employer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
-    jobTitle: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    jobTitle: { type: String, required: true, trim: true },
 
-    jobDesc: {
-      type: String,
-      required: true,
-    },
+    jobDesc: { type: String, required: true },
 
-    jobRes: {
-      type: String,
-      required: true,
-    },
+    jobRes: { type: String, required: true },
 
-    jobQual: {
-      type: String,
-      required: true,
-    },
+    jobQual: { type: String, required: true },
 
-    jobLoc: {
-      type: String,
-      required: true,
-      index: true
-    },
+    jobLoc: { type: String, required: true, index: true },
 
-    minSalary: {
-      type: Number,
-      required: true,
-    },
+    minSalary: { type: Number, required: true },
 
-    maxSalary: {
-      type: Number,
-      required: true,
-    },
+    maxSalary: { type: Number, required: true },
 
-    jobType: {
-      type: String,
-      required: true,
-      index: true
-    },
+    jobType: { type: String, required: true, index: true },
 
-    status: {
-      type: String,
-      enum: ["active", "closed"],
-      default: "active",
-      index: true
-    },
+    status: { type: String, enum: ["active", "closed"], default: "active", index: true },
   },
   { timestamps: true },
 );
 
-jobSchema.index({ jobTitle: 'text', jobDesc: 'text' }) //this is a text index in which jobTitle and jobDesc will be broken into individual words and then stop words will be removed like we, are, a, who and then it applied stemming which means it chops the words down to their root form like "developing becomes develop", "applications become applic" now all this root words are added into one giant dictionary which will be stored in mongodb memory mapping words to Job IDs.
+jobSchema.index({ jobTitle: 'text', jobDesc: 'text' })                                            //this is a text index in which jobTitle and jobDesc will be broken into individual words and then stop words will be removed like we, are, a, who and then it applied stemming which means it chops the words down to their root form like "developing becomes develop", "applications become applic" now all this root words are added into one giant dictionary which will be stored in mongodb memory mapping words to Job IDs.
 jobSchema.index({ employer: 1, createdAt: -1}) 
 
 export default mongoose.model("Job", jobSchema);
