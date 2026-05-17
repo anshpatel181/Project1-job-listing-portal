@@ -11,12 +11,13 @@ import jobRoutes from "./routes/jobRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js"
 import { connectCloudinary } from "./config/cloudinary.js";
-
+import helmet from "helmet"
 
 const app = express();
 
 await connectCloudinary();
 
+app.use(helmet())
 app.use(cors());
 app.use(express.json());
 

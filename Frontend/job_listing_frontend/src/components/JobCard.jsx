@@ -1,4 +1,6 @@
-export const JobCard = ({job, handleApply, applied, loadingApply}) => {
+import React from "react"
+
+export const JobCard = React.memo(({ job, handleApply, applied, loadingApply }) => {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
 
@@ -64,3 +66,6 @@ export const JobCard = ({job, handleApply, applied, loadingApply}) => {
         </div>
     )
 }
+)
+
+// React.memo: compare old props with new props and in this comparison if props are primitive value which means 1 === 1 then it will be true and react.memo says props are same do not re-render child component but when props are functions or objects then they are compared by reference which means old reference vs new reference and whenever parent component re-renders functions and objects inside that are created again and because of that in props old reference vs new reference are different and because of that react.memo says re-render child component because props are changed and this problem will be solved by useCallback because useCallback memoize the function reference which means it tells react that re-create this function on every-render only if dependencies are changed which means if dependencies not changed then do not re-create this function and pass the function to the props where old reference === new reference and child avoids re-render

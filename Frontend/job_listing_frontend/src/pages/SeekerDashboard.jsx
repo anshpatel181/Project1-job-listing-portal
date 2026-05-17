@@ -28,7 +28,7 @@ export const SeekerDashboard = () => {
       if (!res.ok) {
         toast.error("Failed to fetch applications");
       }
-      
+
       return res.json();
     } catch (error) {
       toast.error(error.message);
@@ -40,12 +40,12 @@ export const SeekerDashboard = () => {
     queryFn: searchJobs
   })
 
-  const {data: applications} = useQuery({
+  const { data: applications } = useQuery({
     queryKey: ["applications"],
     queryFn: fetchApplications
   })
 
-  const {data: savedJobs} = useQuery({
+  const { data: savedJobs } = useQuery({
     queryKey: ["savedJobs"],
     queryFn: getSavedJobs
   })

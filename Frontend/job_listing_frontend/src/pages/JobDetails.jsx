@@ -5,6 +5,7 @@ import { applyToJob, checkApplied } from "../services/applicationService";
 import { toast } from "react-toastify";
 import FullScreenLoader from "../components/loaders/FullScreenLoader";
 import { JobCard } from "../components/JobCard";
+import { useCallback } from "react";
 
 export const JobDetails = () => {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export const JobDetails = () => {
   const [applied, setApplied] = useState(false);
   const [loadingApply, setLoadingApply] = useState(false);
   const BASE_URL = import.meta.env.VITE_BACKEND_URL
-          
+
   useEffect(() => {
     const fetchJob = async () => {
       try {
@@ -36,25 +37,30 @@ export const JobDetails = () => {
   }, [id]);
 
   useEffect(() => {
-  const verifyApplied = async () => {
+    const verifyApplied = async () => {
+      try {
+        const res = await checkApplied(id);
+        if (res.applied) setApplied(true);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    verifyApplied();
+  }, [id]);
+  
+  const handleApply = useCallback(async () => {
+  
     try {
-      const res = await checkApplied(id);
-      if (res.applied) setApplied(true);
-    } catch (err) {
-      console.error(err);
+      setLoadingApply(true);
+      await applyToJob(job._id);
+      setApplied(true);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoadingApply(false);
     }
-  };
-
-  verifyApplied();
-}, [id]);
-
-  if (loading) {
-    return (
-      <p className="text-center mt-20 text-slate-500">
-        Loading job details…
-      </p>
-    );
-  }
+  }, [job]);
 
   if (!job) {
     return (
@@ -64,20 +70,8 @@ export const JobDetails = () => {
     );
   }
 
-  const handleApply = async () => {
-  try {
-    setLoadingApply(true);
-    await applyToJob(job._id);
-    setApplied(true);
-  } catch (error) {
-    toast.error(error.message);
-  } finally {
-    setLoadingApply(false);
-  }
-};
-
-  if(loading) {
-    return <FullScreenLoader/>
+  if (loading) {
+    return <FullScreenLoader />
   }
 
   return (
@@ -94,7 +88,7 @@ export const JobDetails = () => {
             ← Back to Jobs
           </NavLink>
 
-          <JobCard job={job} applied={applied} handleApply={handleApply} loadingApply={loadingApply}/>
+          <JobCard job={job} applied={applied} handleApply={handleApply} loadingApply={loadingApply} />
         </div>
       </div>
     </>
