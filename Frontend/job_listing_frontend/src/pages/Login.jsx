@@ -37,6 +37,11 @@ export const Login = () => {
     try {
       const data = await loginUser(formData);
 
+      if(data.success === false) {
+        toast.error(data.message)
+        return;
+      }
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
 

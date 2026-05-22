@@ -39,12 +39,13 @@ export const register = async (req, res) => {
     res
       .status(201)
       .json({
+        success: true,
         message: "You have registered successfully",
         token,
         role: user.role,
       });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -59,13 +60,13 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
     }
 
     const token = generateToken(user);
@@ -78,7 +79,7 @@ export const login = async (req, res) => {
         role: user.role,
       });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -129,7 +130,7 @@ export const googleRegister = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
@@ -144,7 +145,7 @@ export const linkedinRegister = async (req, res) => {
         code,
         client_id: process.env.LINKEDIN_CLIENT_ID,
         client_secret: process.env.LINKEDIN_CLIENT_SECRET,
-        redirect_uri: "http://localhost:5173/linkedin/callback",
+        redirect_uri: "https://project1-job-listing-frontend.vercel.app/linkedin/callback",
       }).toString(),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     )
@@ -281,7 +282,7 @@ export const getEmail = async (req, res) => {
       await cacheService.set(`token:${hashedToken}`, userExists.id, 600)
     }
     
-    const resetLink = `http://localhost:5173/reset-password/${token}`
+    const resetLink = `https://project1-job-listing-frontend.vercel.app/reset-password/${token}`
     const response = await sendResetEmail(email, otp, resetLink)
     
     if (response.success) {
